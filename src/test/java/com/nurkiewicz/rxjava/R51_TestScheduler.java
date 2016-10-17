@@ -1,9 +1,12 @@
 package com.nurkiewicz.rxjava;
 
+import com.google.common.math.IntMath;
 import com.nurkiewicz.rxjava.util.CloudClient;
+import io.reactivex.Flowable;
+import io.reactivex.Scheduler;
 import io.reactivex.schedulers.TestScheduler;
 import io.reactivex.subscribers.TestSubscriber;
-import org.junit.Ignore;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +17,6 @@ import java.util.concurrent.atomic.LongAdder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
 public class R51_TestScheduler {
 	
 	private static final Logger log = LoggerFactory.getLogger(R51_TestScheduler.class);
@@ -34,16 +36,18 @@ public class R51_TestScheduler {
 		//when
 		final TestSubscriber<BigDecimal> subscriber = cloudClient
 				.pricing()
+				.timeout(3, TimeUnit.SECONDS, clock)
+				.onErrorReturn(ex -> FALLBACK)
 				.test();
-		
+
 		//then
 		subscriber.assertNoValues();
 		subscriber.assertNoErrors();
-
+		
 		clock.advanceTimeBy(2_999, TimeUnit.MILLISECONDS);
 		subscriber.assertNoValues();
 		subscriber.assertNoErrors();
-
+		
 		clock.advanceTimeBy(1, TimeUnit.MILLISECONDS);
 		subscriber.assertValue(FALLBACK);
 		subscriber.assertNoErrors();
@@ -64,6 +68,10 @@ public class R51_TestScheduler {
 		//when
 		final TestSubscriber<BigDecimal> subscriber = cloudClient
 				.broken()
+				.doOnSubscribe(sub -> log.trace("Subscribed"))
+				.doOnError(e -> log.warn("Error: " + e))
+				.doOnSubscribe(sub -> subscriptionCounter.increment())
+				.retryWhen(errors -> exponentialBackoff(errors, clock))
 				.onErrorReturn(error -> FALLBACK)
 				.test();
 		
@@ -100,4 +108,10 @@ public class R51_TestScheduler {
 		subscriber.assertNoErrors();
 	}
 	
+	private Flowable<Long> exponentialBackoff(Flowable<?> errors, Scheduler clock) {
+		return errors
+				.zipWith(Flowable.range(0, 4), Pair::of)
+				.map(p -> IntMath.pow(2, p.getValue()))
+				.flatMap(delay -> Flowable.timer(delay, TimeUnit.SECONDS, clock));
+	}
 }

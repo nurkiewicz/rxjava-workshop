@@ -45,9 +45,9 @@ public class R03_Unsubscription {
 	 */
 	@Test
 	public void handleUnsubscription() throws Exception {
-		Observable<String> obs = Observable.create(sub -> {
-			Thread thread = pinger(sub);
-			//...
+		Observable<String> obs = Observable.create(emitter -> {
+			Thread thread = pinger(emitter);
+			emitter.setCancellable(thread::interrupt);
 		});
 		Disposable subscription = obs.subscribe(log::info);
 		

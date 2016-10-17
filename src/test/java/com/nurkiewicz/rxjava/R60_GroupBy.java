@@ -6,6 +6,7 @@ import io.reactivex.Scheduler;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -15,8 +16,10 @@ import java.time.Instant;
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+
 
 @Ignore
 public class R60_GroupBy {
@@ -33,6 +36,8 @@ public class R60_GroupBy {
 
 		//when
 		clicks
+				.buffer(1, SECONDS)
+				.map(List::size)
 				.take(5)
 				.blockingSubscribe(x -> log.info("{} clicks/s", x));
 
@@ -50,6 +55,8 @@ public class R60_GroupBy {
 
 		//when
 		clicks
+				.window(1, SECONDS)
+				.flatMap(win -> win.count().toObservable())
 				.take(5)
 				.blockingSubscribe(x -> log.info("{} clicks/s", x));
 
@@ -64,9 +71,10 @@ public class R60_GroupBy {
 
 		//when
 		final TestObserver<Long> subscriber = clicks
-				.map(x -> 0L)  //TODO Use window() to count here
+				.window(1, SECONDS, scheduler)
+				.flatMap(win -> win.count().toObservable())
 				.test();
-
+		
 		//then
 		scheduler.advanceTimeBy(1_000 - 1, MILLISECONDS);
 		subscriber.assertNoValues();
@@ -89,7 +97,7 @@ public class R60_GroupBy {
 
 	/**
 	 * Total clicks from which country?
-	 * Hint: grouped.getKeu
+	 * Hint: grouped.getKey()
 	 * Hint: Pair class will be useful
 	 */
 	@Test
@@ -100,7 +108,9 @@ public class R60_GroupBy {
 		//when
 		clicks
 				.take(1000)
-				.blockingSubscribe(x -> log.info("Total {} clicks from {} country", x));
+				.groupBy(Click::getCountry)
+				.flatMap(grouped -> grouped.count().map(c -> Pair.of(grouped.getKey(), c)).toObservable())
+				.blockingSubscribe(x -> log.info("Total {} clicks from {} country", x.getValue(), x.getKey()));
 
 		//then
 	}
@@ -113,7 +123,13 @@ public class R60_GroupBy {
 
 		//when
 		List<String> firstStats = clicks
-				.map(x -> x.toString())  //TODO Implement groupBy here
+				.groupBy(Click::getCountry)
+				.flatMap(grouped -> grouped
+						.window(1, SECONDS)
+						.flatMap(w -> w.count().toObservable())
+						.map(x -> grouped.getKey() + "-" + x)
+				)
+				.doOnNext(x -> System.out.println(x))
 				.take(3)
 				.toList()
 				.blockingGet()

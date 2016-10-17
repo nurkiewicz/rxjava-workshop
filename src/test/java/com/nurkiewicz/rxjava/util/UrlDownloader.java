@@ -51,5 +51,5 @@ public class UrlDownloader {
 		log.trace("Done: {}", url);
 		return "<html>" + url.getHost() + "</html>";
 	}
-	
+
 }

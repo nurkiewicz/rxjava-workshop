@@ -20,7 +20,7 @@ public class R22_ConcatMap {
 		//TODO Change flatMap to concatMap
 		Urls
 				.all()
-				.flatMap(u -> UrlDownloader.downloadAsync(u, Schedulers.io()))
+				.concatMap(u -> UrlDownloader.downloadAsync(u, Schedulers.io()))
 				.test()
 				.await();
 	}
@@ -37,7 +37,7 @@ public class R22_ConcatMap {
 		assertThat(firstSubscribed.get()).describedAs("Should subscribe to first").isTrue();
 		assertThat(secondSubscribed.get()).describedAs("Should not subscribe to second").isFalse();
 	}
-	
+
 	private Flowable<Integer> listOfInts(AtomicBoolean subscriptionFlag, Integer... values) {
 		return Flowable
 				.fromCallable(() -> Arrays.asList(values))

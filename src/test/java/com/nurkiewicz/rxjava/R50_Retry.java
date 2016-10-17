@@ -37,6 +37,7 @@ public class R50_Retry {
 		//when
 		cloudClient
 				.pricing()
+				.retry(3)
 				.test();
 		
 		//then

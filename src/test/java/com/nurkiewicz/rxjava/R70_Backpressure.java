@@ -16,13 +16,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.time.Duration;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
+
 
 @Ignore
 public class R70_Backpressure {
-	
+
 	private static final Logger log = LoggerFactory.getLogger(R70_Backpressure.class);
-	
+
 	@Test
 	public void missingBackpressure() throws Exception {
 		Flowable
@@ -31,10 +33,10 @@ public class R70_Backpressure {
 				.observeOn(Schedulers.computation())
 				.doOnNext(x -> log.trace("Handling: {}", x))
 				.subscribe(x -> Sleeper.sleep(Duration.ofMillis(6)));
-		
+
 		TimeUnit.SECONDS.sleep(30);
 	}
-	
+
 	@Test
 	public void loadingDataFromInfiniteReader() throws Exception {
 		//given
@@ -46,24 +48,32 @@ public class R70_Backpressure {
 				.test()
 				.assertValues("0", "1", "2", "3");
 	}
-	
+
 	@Test
 	public void backpressureIsNotAproblemIfTheSameThread() throws Exception {
 		Flowable<String> numbers = Flowable.create(sub -> pushNumbersToSubscriber(sub), BackpressureStrategy.ERROR);
-		
+
 		numbers
 				.doOnNext(x -> log.info("Emitted: {}", x))
 				.subscribe(x -> Sleeper.sleep(Duration.ofMillis(6)));
 	}
-	
+
 	/**
 	 * TODO Reimplement `numbers` so that lines are pulled by subscriber, not pushed to subscriber
 	 */
 	@Test
 	public void missingBackpressureIfCrossingThreads() throws Exception {
-		Flowable<String> numbers = Flowable.create(sub -> pushNumbersToSubscriber(sub), BackpressureStrategy.ERROR);
+		Iterable<String> iterable = new Iterable<String>() {
+			Reader reader = new InfiniteReader(NumberSupplier.lines());
+			BufferedReader lines = new BufferedReader(reader);
 
-		numbers
+			@Override
+			public Iterator<String> iterator() {
+				return lines.lines().iterator();
+			}
+		};
+
+		Flowable.fromIterable(iterable)
 				.observeOn(Schedulers.io())
 				.blockingSubscribe(x -> Sleeper.sleep(Duration.ofMillis(6)));
 	}
