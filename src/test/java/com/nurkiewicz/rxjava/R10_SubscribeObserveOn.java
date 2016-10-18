@@ -1,5 +1,6 @@
 package com.nurkiewicz.rxjava;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.nurkiewicz.rxjava.util.Sleeper;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -11,6 +12,9 @@ import rx.observers.TestSubscriber;
 import rx.schedulers.Schedulers;
 
 import java.math.BigDecimal;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import static java.time.Duration.ofMillis;
 import static java.time.Duration.ofSeconds;
@@ -27,10 +31,11 @@ public class R10_SubscribeObserveOn {
 		Observable<BigDecimal> obs = slowFromCallable();
 		
 		obs
-				.subscribeOn(Schedulers.io())
+				.subscribeOn(Schedulers.io())  //nie polecam
 				.subscribe(
 						x -> log.info("Got: {}", x)
 				);
+		log.info("Subscribed");
 		Sleeper.sleep(ofMillis(1_100));
 	}
 	
@@ -40,7 +45,8 @@ public class R10_SubscribeObserveOn {
 		
 		obs
 				.subscribeOn(Schedulers.io())
-				.subscribe(
+				.toBlocking()
+				.forEach(
 						x -> log.info("Got: {}", x)
 				);
 		Sleeper.sleep(ofMillis(1_100));
@@ -67,6 +73,7 @@ public class R10_SubscribeObserveOn {
 				.subscribe(
 						x -> log.info("Got: {}", x)
 				);
+		log.info("Blocked?");
 		Sleeper.sleep(ofMillis(1_100));
 	}
 	
@@ -89,7 +96,11 @@ public class R10_SubscribeObserveOn {
 	 * Hint: ThreadFactoryBuilder
 	 */
 	private Scheduler myCustomScheduler() {
-		return Schedulers.io();
+		ThreadFactory threadFactory = new ThreadFactoryBuilder()
+				.setNameFormat("CustomExecutor-%d")
+				.build();
+		ExecutorService executor = Executors.newFixedThreadPool(10, threadFactory);
+		return Schedulers.from(executor);
 	}
 	
 	

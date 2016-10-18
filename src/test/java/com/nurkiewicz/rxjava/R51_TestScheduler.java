@@ -36,6 +36,10 @@ public class R51_TestScheduler {
 		//when
 		cloudClient
 				.pricing()
+//				.timeout(3, TimeUnit.SECONDS, Observable.just(FALLBACK), clock)
+				.timeout(3, TimeUnit.SECONDS, clock)
+				.doOnError(ex -> log.warn("Error", ex))
+				.onErrorReturn(ex -> FALLBACK)
 				.subscribe(subscriber);
 		
 		//then

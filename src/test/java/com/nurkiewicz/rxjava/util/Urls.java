@@ -3,9 +3,13 @@ package com.nurkiewicz.rxjava.util;
 import rx.Observable;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 public class Urls {
 	
@@ -19,7 +23,37 @@ public class Urls {
 	
 	private static Observable<URL> load(String fileName) {
 		try (Stream<String> lines = classpathReaderOf(fileName).lines()) {
-			return Observable.empty();
+//			Observable<List<URL>> obs = Observable.fromCallable(() -> {
+//				return lines
+//						.map(line -> {
+//							try {
+//								return new URL(line);
+//							} catch (MalformedURLException e) {
+//								throw new IllegalArgumentException(line);
+//							}
+//						})
+//						.collect(toList());
+//			});
+//			return obs
+//					.flatMap((List<URL> x) -> Observable.from(x));
+//			return obs
+//					.concatMapIterable((List<URL> x) -> x);
+			
+			
+//			Stream
+//					.of(1,2,3)
+//					.flatMap(x -> Arrays.asList(x, -x).stream())
+			
+			List<URL> urls = lines
+					.map(line -> {
+						try {
+							return new URL(line);
+						} catch (MalformedURLException e) {
+							throw new IllegalArgumentException(line);
+						}
+					})
+					.collect(toList());
+			return Observable.from(urls);
 		} catch (Exception e) {
 			return Observable.error(e);
 		}

@@ -29,6 +29,7 @@ public class R02_Create {
 	public void observableUsingCreate() throws Exception {
 		Observable<String> obs = Observable.create(sub -> {
 			sub.onNext("A");
+			sub.onNext("B");
 			sub.onCompleted();
 		});
 		
@@ -36,6 +37,7 @@ public class R02_Create {
 		obs.subscribe(subscriber);
 		
 		subscriber.assertValues("A", "B");
+		subscriber.assertCompleted();
 	}
 	
 	/**
@@ -43,7 +45,7 @@ public class R02_Create {
 	 */
 	@Test
 	public void sameThread() throws Exception {
-		String curThreadName = Thread.currentThread().getName();
+		String curThreadName = Thread.currentThread().getName();  //main
 		
 		Observable<String> obs = Observable.create(sub -> {
 			sub.onNext(Thread.currentThread().getName());
@@ -59,6 +61,7 @@ public class R02_Create {
 	@Test
 	public void createCanBeBlocking() throws Exception {
 		log.info("Start");
+//		Observable.empty();
 		Observable<String> obs = Observable.create(sub -> {
 			log.info("In create()");
 			Sleeper.sleep(Duration.ofSeconds(2));
@@ -89,7 +92,7 @@ public class R02_Create {
 	public void cachingWhenCreateIsInvokedManyTimes() throws Exception {
 		DataSource ds = mock(DataSource.class);
 		
-		Observable<Integer> obs = queryDatabase(ds);
+		Observable<Integer> obs = queryDatabase(ds).cache();
 		
 		obs.subscribe();
 		obs.subscribe();
@@ -99,7 +102,10 @@ public class R02_Create {
 	
 	private Observable<Integer> queryDatabase(DataSource ds) {
 		return Observable.create(sub -> {
+			log.debug("Fetching connection");
 			try (Connection conn = ds.getConnection()) {
+//				conn.createStatement().execute("SELECT * FROM ")
+//				sub.onNext(resultSet);
 				sub.onCompleted();
 			} catch (SQLException e) {
 				sub.onError(e);
@@ -114,7 +120,7 @@ public class R02_Create {
 	public void infiniteObservable() throws Exception {
 		Observable<Integer> obs = Observable.create(sub -> {
 			int i = 0;
-			while (true) {
+			while (!sub.isUnsubscribed()) {
 				sub.onNext(i++);
 			}
 		});
@@ -126,6 +132,7 @@ public class R02_Create {
 				.subscribe(subscriber);
 		
 		subscriber.assertValues(10, 11, 12);
+		subscriber.assertCompleted();
 	}
 	
 	/**
@@ -135,8 +142,8 @@ public class R02_Create {
 	public void infiniteObservableInBackground() throws Exception {
 		Observable<Integer> obs = Observable.create(sub ->
 				runInBackground(() -> {
-							int i = 10;
-							while (true) {
+							int i = 0;
+							while (!sub.isUnsubscribed()) {
 								sub.onNext(i++);
 							}
 						}

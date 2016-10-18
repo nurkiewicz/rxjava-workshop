@@ -132,6 +132,22 @@ public class R60_GroupBy {
 		assertThat(firstStats.get(2)).matches("US-\\d+");
 	}
 	
+	@Test
+	public void clicksPerSecond() throws Exception {
+		//given
+		Observable<Click> clicks = clicks(Schedulers.io());
+		
+		//when
+		Observable<Integer> clickCount = clicks
+				.buffer(1, TimeUnit.SECONDS)
+				.map(List::size);
+		
+		//then
+		Observable<Integer> clickCount2 = clicks
+				.window(1, TimeUnit.SECONDS)
+				.flatMap(Observable::count);
+	}
+	
 	
 	Observable<Click> clicks(Scheduler scheduler) {
 		return Observable

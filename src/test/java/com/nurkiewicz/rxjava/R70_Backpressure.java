@@ -21,8 +21,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.time.Duration;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * nurkiewicz@gmail.com
+ * @tnurkiewicz
+ */
 @Ignore
 public class R70_Backpressure {
 	
@@ -104,11 +109,18 @@ public class R70_Backpressure {
 	 */
 	@Test
 	public void missingBackpressureIfCrossingThreads() throws Exception {
-		Observable<String> numbers = Observable.create(sub -> pushNumbersToSubscriber(sub));
+		Iterable<String> iterable = new Iterable<String>() {
+			Reader reader = new InfiniteReader(NumberSupplier.lines());
+			BufferedReader lines = new BufferedReader(reader);
+			
+			@Override
+			public Iterator<String> iterator() {
+				return lines.lines().iterator();
+			}
+		};
 		
-		numbers
+		Observable.from(iterable)
 				.observeOn(Schedulers.io())
-				.doOnNext(x -> counter.dec())
 				.toBlocking()
 				.subscribe(x -> Sleeper.sleep(Duration.ofMillis(6)));
 	}

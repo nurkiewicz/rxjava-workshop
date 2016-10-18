@@ -29,15 +29,19 @@ public class R50_Retry {
 	@Test
 	public void shouldRetryThreeTimes() throws Exception {
 		//given
+//		Observable.error()
 		LongAdder subscriptionCounter = new LongAdder();
 		given(cloudClient.pricing()).willReturn(
 				failure()
 						.doOnSubscribe(subscriptionCounter::increment)
 		);
-				
+		
 		//when
 		cloudClient
 				.pricing()
+				.doOnSubscribe(() -> log.trace("Subscribing"))
+				.doOnError(ex -> log.warn("Opps " + ex))
+				.retry(3)
 				.subscribe(new TestSubscriber<>());
 		
 		//then

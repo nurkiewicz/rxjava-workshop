@@ -35,7 +35,10 @@ public class R31_WindowBuffer {
 		Observable<String> everyThirdWord = LOREM_IPSUM;
 		
 		//when
-		everyThirdWord.subscribe(subscriber);
+		everyThirdWord
+				.window(3)
+				.flatMap(obs -> obs.elementAt(2))
+				.subscribe(subscriber);
 		
 		//then
 		subscriber.assertValues("dolor", "consectetur");

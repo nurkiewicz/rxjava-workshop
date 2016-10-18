@@ -8,10 +8,15 @@ import org.slf4j.LoggerFactory;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
+import rx.subscriptions.Subscriptions;
 
 import static com.nurkiewicz.rxjava.util.Threads.runInBackground;
 import static java.time.Duration.ofSeconds;
 
+/**
+ * Presentation assistant
+ * Key promoter
+ */
 @Ignore
 public class R03_Unsubscription {
 	
@@ -41,13 +46,12 @@ public class R03_Unsubscription {
 	/**
 	 * Hint: sub.add(Subscriptions.create(...))
 	 * Hint: Thread.interrupt()
-	 * Hint: Thread.currentThread().isInterrupted()
 	 */
 	@Test
 	public void handleUnsubscription() throws Exception {
 		Observable<String> obs = Observable.create(sub -> {
 			Thread thread = pinger(sub);
-			//...
+			sub.add(Subscriptions.create(thread::interrupt));
 		});
 		Subscription subscription = obs.subscribe(log::info);
 		

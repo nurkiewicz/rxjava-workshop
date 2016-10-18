@@ -1,9 +1,12 @@
 package com.nurkiewicz.rxjava;
 
+import com.nurkiewicz.rxjava.util.UrlDownloader;
 import com.nurkiewicz.rxjava.util.Urls;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Ignore;
 import org.junit.Test;
 import rx.Observable;
+import rx.schedulers.Schedulers;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,11 +28,29 @@ public class R21_FlatMap {
 	@Test
 	public void shouldDownloadAllUrls() throws Exception {
 		//given
+		
+//		Observable.just(1,2).toBlocking().first();
+		
 		Observable<URL> urls = Urls.all();
 		
-		//when
-		//WARNING: URL key in HashMap is a bad idea here
-		Map<URI, String> bodies = new HashMap<>();
+		//bardzo źle, czasem zadziała:
+		Observable<Pair<URL, String>> zip = Observable.zip(
+				urls, //google, youtube, facebook
+				urls.flatMap(UrlDownloader::download),  //youtube, google, facebook
+				Pair::of
+		);
+		
+//		urls.flatMap(UrlDownloader::download)
+		
+		Map<URI, String> bodies = urls
+				.flatMap(url -> UrlDownloader
+						.download(url)
+						.subscribeOn(Schedulers.io())
+						.map(body -> Pair.of(toUri(url), body))
+				)
+				.toMap(Pair::getLeft, Pair::getRight)
+				.toBlocking()
+				.single();
 		
 		//then
 		assertThat(bodies).hasSize(996);
