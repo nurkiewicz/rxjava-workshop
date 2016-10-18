@@ -1,6 +1,5 @@
 package com.nurkiewicz.rxjava;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Ignore;
 import org.junit.Test;
 import rx.Observable;
@@ -40,9 +39,7 @@ public class R30_Zip {
 	public void everyThirdWord() throws Exception {
 		//given
 		TestSubscriber<String> subscriber = new TestSubscriber<>();
-		Observable<String> everyThirdWord = LOREM_IPSUM.zipWith(Observable.range(1, 3).repeat(), Pair::of)
-				.filter(p -> p.getValue() == 3)
-				.map(Pair::getKey);
+		Observable<String> everyThirdWord = LOREM_IPSUM;
 		
 		//when
 		everyThirdWord.subscribe(subscriber);
