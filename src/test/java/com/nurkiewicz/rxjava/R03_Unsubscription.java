@@ -39,7 +39,7 @@ public class R03_Unsubscription {
 	}
 	
 	/**
-	 * Hint: sub.add(Disposables.create(...))
+	 * Hint: sub.setCancellable(...)
 	 * Hint: Thread.interrupt()
 	 * Hint: Thread.currentThread().isInterrupted()
 	 */

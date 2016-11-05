@@ -63,8 +63,8 @@ public class R60_GroupBy {
 		Observable<Click> clicks = clicks(scheduler);
 
 		//when
-		final TestObserver<Integer> subscriber = clicks
-				.map(x -> 0)  //TODO Use window() to count here
+		final TestObserver<Long> subscriber = clicks
+				.map(x -> 0L)  //TODO Use window() to count here
 				.test();
 
 		//then

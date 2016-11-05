@@ -20,7 +20,9 @@ public class R22_ConcatMap {
 		//TODO Change flatMap to concatMap
 		Urls
 				.all()
-				.flatMap(u -> UrlDownloader.downloadAsync(u, Schedulers.io()));
+				.flatMap(u -> UrlDownloader.downloadAsync(u, Schedulers.io()))
+				.test()
+				.await();
 	}
 	
 	@Test
@@ -30,7 +32,7 @@ public class R22_ConcatMap {
 		Flowable<Integer> first = listOfInts(firstSubscribed, 1, 2, 3);
 		Flowable<Integer> second = listOfInts(secondSubscribed, 4, 5, 6);
 		
-		//TODO Change take(N) to 0, 1, 4, 7
+		//TODO Change take(N) to 1, 4, 7
 		first.concatWith(second).take(3).blockingSubscribe();
 		assertThat(firstSubscribed.get()).describedAs("Should subscribe to first").isTrue();
 		assertThat(secondSubscribed.get()).describedAs("Should not subscribe to second").isFalse();

@@ -32,9 +32,10 @@ public class R02_Create {
 			emitter.onComplete();
 		});
 		
-		TestObserver<String> subscriber = obs.test();
-		
-		subscriber.assertValues("A", "B");
+		obs
+				.test()
+				.assertValues("A", "B")
+				.assertComplete();
 	}
 	
 	/**
@@ -49,9 +50,9 @@ public class R02_Create {
 			sub.onComplete();
 		});
 		
-		TestObserver<String> subscriber = obs.test();
-		
-		subscriber.assertValues(curThreadName);
+		obs
+				.test()
+				.assertValues(curThreadName);
 	}
 	
 	@Test
@@ -106,7 +107,7 @@ public class R02_Create {
 	}
 	
 	/**
-	 * Hint: isUnsubscribed()
+	 * Hint: isDisposed()
 	 */
 	@Test
 	public void infiniteObservable() throws Exception {
@@ -132,7 +133,7 @@ public class R02_Create {
 	public void infiniteObservableInBackground() throws Exception {
 		Observable<Integer> obs = Observable.create(sub ->
 				runInBackground(() -> {
-							int i = 10;
+							int i = 0;
 							while (true) {
 								sub.onNext(i++);
 							}
