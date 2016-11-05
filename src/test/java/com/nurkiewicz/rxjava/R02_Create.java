@@ -1,12 +1,12 @@
 package com.nurkiewicz.rxjava;
 
 import com.nurkiewicz.rxjava.util.Sleeper;
+import io.reactivex.Observable;
+import io.reactivex.observers.TestObserver;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.Observable;
-import rx.observers.TestSubscriber;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -27,13 +27,12 @@ public class R02_Create {
 	 */
 	@Test
 	public void observableUsingCreate() throws Exception {
-		Observable<String> obs = Observable.create(sub -> {
-			sub.onNext("A");
-			sub.onCompleted();
+		Observable<String> obs = Observable.create(emitter -> {
+			emitter.onNext("A");
+			emitter.onComplete();
 		});
 		
-		TestSubscriber<String> subscriber = new TestSubscriber<>();
-		obs.subscribe(subscriber);
+		TestObserver<String> subscriber = obs.test();
 		
 		subscriber.assertValues("A", "B");
 	}
@@ -47,11 +46,10 @@ public class R02_Create {
 		
 		Observable<String> obs = Observable.create(sub -> {
 			sub.onNext(Thread.currentThread().getName());
-			sub.onCompleted();
+			sub.onComplete();
 		});
 		
-		TestSubscriber<String> subscriber = new TestSubscriber<>();
-		obs.subscribe(subscriber);
+		TestObserver<String> subscriber = obs.test();
 		
 		subscriber.assertValues(curThreadName);
 	}
@@ -62,7 +60,7 @@ public class R02_Create {
 		Observable<String> obs = Observable.create(sub -> {
 			log.info("In create()");
 			Sleeper.sleep(Duration.ofSeconds(2));
-			sub.onCompleted();
+			sub.onComplete();
 			log.info("Completed");
 		});
 		log.info("Subscribing");
@@ -100,7 +98,7 @@ public class R02_Create {
 	private Observable<Integer> queryDatabase(DataSource ds) {
 		return Observable.create(sub -> {
 			try (Connection conn = ds.getConnection()) {
-				sub.onCompleted();
+				sub.onComplete();
 			} catch (SQLException e) {
 				sub.onError(e);
 			}
@@ -119,11 +117,10 @@ public class R02_Create {
 			}
 		});
 		
-		TestSubscriber<Integer> subscriber = new TestSubscriber<>();
-		obs
+		TestObserver<Integer> subscriber = obs
 				.skip(10)
 				.take(3)
-				.subscribe(subscriber);
+				.test();
 		
 		subscriber.assertValues(10, 11, 12);
 	}
@@ -143,11 +140,10 @@ public class R02_Create {
 				)
 		);
 		
-		TestSubscriber<Integer> subscriber = new TestSubscriber<>();
-		obs
+		TestObserver<Integer> subscriber = obs
 				.skip(10)
 				.take(3)
-				.subscribe(subscriber);
+				.test();
 		await().until(() -> subscriber.assertValues(10, 11, 12));
 	}
 	

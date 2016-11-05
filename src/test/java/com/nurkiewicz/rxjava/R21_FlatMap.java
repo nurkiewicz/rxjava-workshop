@@ -1,9 +1,9 @@
 package com.nurkiewicz.rxjava;
 
 import com.nurkiewicz.rxjava.util.Urls;
+import io.reactivex.Flowable;
 import org.junit.Ignore;
 import org.junit.Test;
-import rx.Observable;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,12 +20,12 @@ public class R21_FlatMap {
 	 * Hint: UrlDownloader.download()
 	 * Hint: flatMap(), maybe concatMap()?
 	 * Hint: Pair.of(...)
-	 * Hint: Observable.toMap()
+	 * Hint: Flowable.toMap()
 	 */
 	@Test
 	public void shouldDownloadAllUrls() throws Exception {
 		//given
-		Observable<URL> urls = Urls.all();
+		Flowable<URL> urls = Urls.all();
 		
 		//when
 		//WARNING: URL key in HashMap is a bad idea here
@@ -44,7 +44,7 @@ public class R21_FlatMap {
 	@Test
 	public void downloadThrottled() throws Exception {
 		//given
-		Observable<URL> urls = Urls.all().take(20);
+		Flowable<URL> urls = Urls.all().take(20);
 		
 		//when
 		//Use UrlDownloader.downloadThrottled()

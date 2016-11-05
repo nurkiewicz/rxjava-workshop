@@ -1,10 +1,10 @@
 package com.nurkiewicz.rxjava;
 
 import com.nurkiewicz.rxjava.util.Urls;
+import io.reactivex.Flowable;
+import io.reactivex.subscribers.TestSubscriber;
 import org.junit.Ignore;
 import org.junit.Test;
-import rx.Observable;
-import rx.observers.TestSubscriber;
 
 import java.io.FileNotFoundException;
 import java.net.URL;
@@ -17,12 +17,12 @@ public class R20_ObservableFromFile {
 	
 	
 	/**
-	 * Hint: Observable.defer or Observable.fromCallable
+	 * Hint: Flowable.defer or Flowable.fromCallable
 	 */
 	@Test
-	public void shouldNotFailWithoutSubscription() throws Exception {
+	public void shouldNotFailWithoutDisposable() throws Exception {
 		//when
-		Observable<URL> all = Urls.all("urrrrrls.txt");
+		Flowable<URL> all = Urls.all("urrrrrls.txt");
 		
 		//then
 		//no exception thrown
@@ -31,41 +31,38 @@ public class R20_ObservableFromFile {
 	@Test
 	public void shouldFailWhenMissingFile() throws Exception {
 		//given
-		Observable<URL> all = Urls.all("urrrrrls.txt");
-		TestSubscriber<URL> subscriber = new TestSubscriber<>();
+		Flowable<URL> all = Urls.all("urrrrrls.txt");
 		
 		//when
-		all.subscribe(subscriber);
+		final TestSubscriber<URL> observer = all.test();
 		
 		//then
-		subscriber.assertNoValues();
-		subscriber.assertError(FileNotFoundException.class);
-		assertThat(subscriber.getOnErrorEvents().get(0)).hasMessageContaining("urrrrrls.txt");
+		observer.assertNoValues();
+		observer.assertError(FileNotFoundException.class);
+		assertThat(observer.errors().get(0)).hasMessageContaining("urrrrrls.txt");
 	}
 	
 	@Test
 	public void shouldFailWhenBrokenFile() throws Exception {
-		Observable<URL> all = Urls.all("urls_broken.txt");
-		TestSubscriber<URL> subscriber = new TestSubscriber<>();
+		Flowable<URL> all = Urls.all("urls_broken.txt");
 		
 		//when
-		all.subscribe(subscriber);
+		final TestSubscriber<URL> observer = all.test();
 		
 		//then
-		subscriber.assertError(IllegalArgumentException.class);
-		assertThat(subscriber.getOnErrorEvents().get(0)).hasMessageContaining("john@gmail.com");
+		observer.assertError(IllegalArgumentException.class);
+		assertThat(observer.errors().get(0)).hasMessageContaining("john@gmail.com");
 	}
 	
 	@Test
 	public void shouldParseAllUrls() throws Exception {
 		//given
-		Observable<URL> all = Urls.all("urls.txt");
+		Flowable<URL> all = Urls.all("urls.txt");
 		
 		//when
 		List<URL> list = all
 				.toList()
-				.toBlocking()
-				.single();
+				.blockingGet();
 		
 		//then
 		assertThat(list).hasSize(996);

@@ -1,13 +1,13 @@
 package com.nurkiewicz.rxjava;
 
 import com.nurkiewicz.rxjava.util.Sleeper;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.disposables.Disposable;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.Observable;
-import rx.Subscriber;
-import rx.Subscription;
 
 import static com.nurkiewicz.rxjava.util.Threads.runInBackground;
 import static java.time.Duration.ofSeconds;
@@ -20,17 +20,17 @@ public class R03_Unsubscription {
 	@Test
 	public void unsubscriptionNotHandled() throws Exception {
 		Observable<String> obs = Observable.create(sub -> pinger(sub));
-		Subscription subscription = obs.subscribe(log::info);
+		Disposable subscription = obs.subscribe(log::info);
 		
 		Sleeper.sleep(ofSeconds(3));
-		subscription.unsubscribe();
+		subscription.dispose();
 		log.info("Unsubscribed?");
 		Sleeper.sleep(ofSeconds(3));
 	}
 	
-	private Thread pinger(Subscriber<? super String> sub) {
+	private Thread pinger(ObservableEmitter<? super String> sub) {
 		return runInBackground(() -> {
-			while (!sub.isUnsubscribed()) {
+			while (!sub.isDisposed()) {
 				sub.onNext("Ping!");
 				Sleeper.sleep(ofSeconds(5));
 			}
@@ -39,7 +39,7 @@ public class R03_Unsubscription {
 	}
 	
 	/**
-	 * Hint: sub.add(Subscriptions.create(...))
+	 * Hint: sub.add(Disposables.create(...))
 	 * Hint: Thread.interrupt()
 	 * Hint: Thread.currentThread().isInterrupted()
 	 */
@@ -49,10 +49,10 @@ public class R03_Unsubscription {
 			Thread thread = pinger(sub);
 			//...
 		});
-		Subscription subscription = obs.subscribe(log::info);
+		Disposable subscription = obs.subscribe(log::info);
 		
 		Sleeper.sleep(ofSeconds(3));
-		subscription.unsubscribe();
+		subscription.dispose();
 		log.info("Unsubscribed?");
 		Sleeper.sleep(ofSeconds(3));
 	}

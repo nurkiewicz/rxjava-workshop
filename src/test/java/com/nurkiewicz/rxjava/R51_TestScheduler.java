@@ -1,13 +1,12 @@
 package com.nurkiewicz.rxjava;
 
 import com.nurkiewicz.rxjava.util.CloudClient;
+import io.reactivex.schedulers.TestScheduler;
+import io.reactivex.subscribers.TestSubscriber;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.observers.TestSubscriber;
-import rx.schedulers.Schedulers;
-import rx.schedulers.TestScheduler;
 
 import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
@@ -30,13 +29,12 @@ public class R51_TestScheduler {
 	@Test
 	public void retryingWithTestScheduler() throws Exception {
 		//given
-		TestScheduler clock = Schedulers.test();
-		TestSubscriber<BigDecimal> subscriber = new TestSubscriber<>();
+		TestScheduler clock = new TestScheduler();
 		
 		//when
-		cloudClient
+		final TestSubscriber<BigDecimal> subscriber = cloudClient
 				.pricing()
-				.subscribe(subscriber);
+				.test();
 		
 		//then
 		subscriber.assertNoValues();
@@ -54,21 +52,20 @@ public class R51_TestScheduler {
 	/**
 	 * Hint: retryWhen()
 	 * Hint: zipWith()
-	 * Hint: Observable.range()
+	 * Hint: Flowable.range()
 	 * Hint: IntMath.pow()
 	 */
 	@Test
 	public void retryingWithExponentialBackoff() throws Exception {
 		//given
-		TestScheduler clock = Schedulers.test();
-		TestSubscriber<BigDecimal> subscriber = new TestSubscriber<>();
+		TestScheduler clock = new TestScheduler();
 		LongAdder subscriptionCounter = new LongAdder();
 		
 		//when
-		cloudClient
+		final TestSubscriber<BigDecimal> subscriber = cloudClient
 				.broken()
 				.onErrorReturn(error -> FALLBACK)
-				.subscribe(subscriber);
+				.test();
 		
 		//then after initial request
 		clock.advanceTimeBy(999, TimeUnit.MILLISECONDS);

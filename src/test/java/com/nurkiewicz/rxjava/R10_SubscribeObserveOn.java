@@ -1,14 +1,14 @@
 package com.nurkiewicz.rxjava;
 
 import com.nurkiewicz.rxjava.util.Sleeper;
+import io.reactivex.Flowable;
+import io.reactivex.Scheduler;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subscribers.TestSubscriber;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.Observable;
-import rx.Scheduler;
-import rx.observers.TestSubscriber;
-import rx.schedulers.Schedulers;
 
 import java.math.BigDecimal;
 
@@ -24,7 +24,7 @@ public class R10_SubscribeObserveOn {
 	
 	@Test
 	public void subscribeOn() throws Exception {
-		Observable<BigDecimal> obs = slowFromCallable();
+		Flowable<BigDecimal> obs = slowFromCallable();
 		
 		obs
 				.subscribeOn(Schedulers.io())
@@ -36,7 +36,7 @@ public class R10_SubscribeObserveOn {
 	
 	@Test
 	public void subscribeOnForEach() throws Exception {
-		Observable<BigDecimal> obs = slowFromCallable();
+		Flowable<BigDecimal> obs = slowFromCallable();
 		
 		obs
 				.subscribeOn(Schedulers.io())
@@ -46,8 +46,8 @@ public class R10_SubscribeObserveOn {
 		Sleeper.sleep(ofMillis(1_100));
 	}
 	
-	private Observable<BigDecimal> slowFromCallable() {
-		return Observable.fromCallable(() -> {
+	private Flowable<BigDecimal> slowFromCallable() {
+		return Flowable.fromCallable(() -> {
 			log.info("Starting");
 			Sleeper.sleep(ofSeconds(1));
 			log.info("Done");
@@ -72,12 +72,11 @@ public class R10_SubscribeObserveOn {
 	
 	@Test
 	public void customExecutor() throws Exception {
-		TestSubscriber<BigDecimal> subscriber = new TestSubscriber<>();
-		slowFromCallable()
+		final TestSubscriber<BigDecimal> subscriber = slowFromCallable()
 				.subscribeOn(myCustomScheduler())
-				.subscribe(subscriber);
+				.test();
 		await().until(() -> {
-					Thread lastSeenThread = subscriber.getLastSeenThread();
+					Thread lastSeenThread = subscriber.lastThread();
 					assertThat(lastSeenThread).isNotNull();
 					assertThat(lastSeenThread.getName()).startsWith("CustomExecutor-");
 				}

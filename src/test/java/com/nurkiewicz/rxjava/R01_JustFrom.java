@@ -1,34 +1,29 @@
 package com.nurkiewicz.rxjava;
 
+import io.reactivex.Flowable;
+import io.reactivex.subscribers.TestSubscriber;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import rx.Observable;
-import rx.observers.TestSubscriber;
 
 @Ignore
 public class R01_JustFrom {
 	
-	private static final Logger log = LoggerFactory.getLogger(R01_JustFrom.class);
-	
 	@Test
-	public void shouldCreateObservableFromConstants() throws Exception {
-		Observable<String> obs = Observable.just("A", null, "C");
+	public void shouldCreateFlowableFromConstants() throws Exception {
+		Flowable<String> obs = Flowable.just("A", "B", "C");
 		
 		obs.subscribe(
-				(x) -> System.out.println("Got: " + x)
+				(String x) -> System.out.println("Got: " + x)
 		);
 	}
 	
 	@Test
 	public void shouldEmitValues() throws Exception {
-		Observable<String> obs = Observable.just("A", null, "C");
+		Flowable<String> obs = Flowable.just("A", "B", "C");
 		
-		TestSubscriber<String> subscriber = new TestSubscriber<>();
-		obs.subscribe(subscriber);
+		final TestSubscriber<String> subscriber = obs.test();
 		
-		subscriber.assertValues("A", null, "C");
+		subscriber.assertValues("A", "B", "C");
 	}
 	
 }

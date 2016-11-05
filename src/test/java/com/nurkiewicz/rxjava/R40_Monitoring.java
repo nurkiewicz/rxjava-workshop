@@ -5,13 +5,13 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Slf4jReporter;
 import com.nurkiewicz.rxjava.util.UrlDownloader;
 import com.nurkiewicz.rxjava.util.Urls;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subscribers.TestSubscriber;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
-import rx.observers.TestSubscriber;
-import rx.schedulers.Schedulers;
 
 import java.util.concurrent.TimeUnit;
 
@@ -49,7 +49,6 @@ public class R40_Monitoring {
 		Urls
 				.all()
 				.flatMap(url -> UrlDownloader.downloadAsync(url, Schedulers.io()))
-				.toBlocking()
-				.subscribe(subscriber);
+				.blockingSubscribe(subscriber);
 	}
 }

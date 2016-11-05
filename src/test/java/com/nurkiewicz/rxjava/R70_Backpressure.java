@@ -6,16 +6,16 @@ import com.codahale.metrics.Slf4jReporter;
 import com.nurkiewicz.rxjava.util.InfiniteReader;
 import com.nurkiewicz.rxjava.util.NumberSupplier;
 import com.nurkiewicz.rxjava.util.Sleeper;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.observers.TestObserver;
+import io.reactivex.schedulers.Schedulers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.Observable;
-import rx.Subscriber;
-import rx.observers.TestSubscriber;
-import rx.schedulers.Schedulers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -67,12 +67,11 @@ public class R70_Backpressure {
 	public void loadingDataFromInfiniteReder() throws Exception {
 		//given
 		Observable<String> numbers = Observable.create(sub -> pushNumbersToSubscriber(sub));
-		TestSubscriber<String> subscriber = new TestSubscriber<>();
-		
+
 		//when
-		numbers
+		final TestObserver<String> subscriber = numbers
 				.take(4)
-				.subscribe(subscriber);
+				.test();
 		
 		//then
 		subscriber.assertValues("0", "1", "2", "3");
@@ -87,10 +86,10 @@ public class R70_Backpressure {
 				.subscribe(x -> Sleeper.sleep(Duration.ofMillis(6)));
 	}
 	
-	private void pushNumbersToSubscriber(Subscriber<? super String> sub) {
+	private void pushNumbersToSubscriber(ObservableEmitter<? super String> sub) {
 		try (Reader reader = new InfiniteReader(NumberSupplier.lines())) {
 			BufferedReader lines = new BufferedReader(reader);
-			while (!sub.isUnsubscribed()) {
+			while (!sub.isDisposed()) {
 				sub.onNext(lines.readLine());
 			}
 		} catch (IOException e) {
@@ -109,8 +108,7 @@ public class R70_Backpressure {
 		numbers
 				.observeOn(Schedulers.io())
 				.doOnNext(x -> counter.dec())
-				.toBlocking()
-				.subscribe(x -> Sleeper.sleep(Duration.ofMillis(6)));
+				.blockingSubscribe(x -> Sleeper.sleep(Duration.ofMillis(6)));
 	}
 	
 }

@@ -1,6 +1,6 @@
 package com.nurkiewicz.rxjava.util;
 
-import rx.Observable;
+import io.reactivex.Flowable;
 
 import java.io.*;
 import java.net.URL;
@@ -9,19 +9,19 @@ import java.util.stream.Stream;
 
 public class Urls {
 	
-	public static Observable<URL> all() {
+	public static Flowable<URL> all() {
 		return all("urls.txt");
 	}
 	
-	public static Observable<URL> all(String fileName) {
-		return Observable.defer(() -> load(fileName));
+	public static Flowable<URL> all(String fileName) {
+		return Flowable.defer(() -> load(fileName));
 	}
 	
-	private static Observable<URL> load(String fileName) {
+	private static Flowable<URL> load(String fileName) {
 		try (Stream<String> lines = classpathReaderOf(fileName).lines()) {
-			return Observable.empty();
+			return Flowable.empty();
 		} catch (Exception e) {
-			return Observable.error(e);
+			return Flowable.error(e);
 		}
 	}
 	

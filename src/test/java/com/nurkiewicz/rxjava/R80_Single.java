@@ -1,8 +1,8 @@
 package com.nurkiewicz.rxjava;
 
+import io.reactivex.Single;
 import org.junit.Ignore;
 import org.junit.Test;
-import rx.Single;
 
 import java.time.Instant;
 

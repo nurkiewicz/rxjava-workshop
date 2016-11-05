@@ -1,12 +1,11 @@
 package com.nurkiewicz.rxjava;
 
 import com.nurkiewicz.rxjava.util.CloudClient;
+import io.reactivex.Flowable;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rx.Observable;
-import rx.observers.TestSubscriber;
 
 import java.math.BigDecimal;
 import java.util.concurrent.atomic.LongAdder;
@@ -32,20 +31,20 @@ public class R50_Retry {
 		LongAdder subscriptionCounter = new LongAdder();
 		given(cloudClient.pricing()).willReturn(
 				failure()
-						.doOnSubscribe(subscriptionCounter::increment)
+						.doOnSubscribe(disposable -> subscriptionCounter.increment())
 		);
 				
 		//when
 		cloudClient
 				.pricing()
-				.subscribe(new TestSubscriber<>());
+				.test();
 		
 		//then
 		await().until(() -> subscriptionCounter.sum() == 4);
 	}
 	
-	private Observable<BigDecimal> failure() {
-		return Observable.error(new RuntimeException("Simulated"));
+	private Flowable<BigDecimal> failure() {
+		return Flowable.error(new RuntimeException("Simulated"));
 	}
 	
 	
