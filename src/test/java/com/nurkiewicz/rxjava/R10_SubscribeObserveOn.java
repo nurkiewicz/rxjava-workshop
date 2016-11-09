@@ -69,7 +69,10 @@ public class R10_SubscribeObserveOn {
 				);
 		Sleeper.sleep(ofMillis(1_100));
 	}
-	
+
+	/**
+	 * TODO Create CustomExecutor
+	 */
 	@Test
 	public void customExecutor() throws Exception {
 		final TestSubscriber<BigDecimal> subscriber = slowFromCallable()
