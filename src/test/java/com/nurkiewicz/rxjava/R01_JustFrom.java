@@ -23,7 +23,9 @@ public class R01_JustFrom {
 		
 		final TestSubscriber<String> subscriber = obs.test();
 		
-		subscriber.assertValues("A", "B", "C");
+		subscriber
+				.assertValues("A", "B", "C")
+				.assertComplete();
 	}
 	
 }

@@ -1,10 +1,12 @@
 package com.nurkiewicz.rxjava;
 
 import io.reactivex.Flowable;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static com.nurkiewicz.rxjava.R30_Zip.LOREM_IPSUM;
 
+@Ignore
 public class R31_WindowBuffer {
 	
 	/**

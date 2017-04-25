@@ -8,8 +8,7 @@ repositories {
 }
 
 dependencies {
-    testCompile 'io.reactivex:rxjava:1.2.1'
-    testCompile 'io.reactivex.rxjava2:rxjava:2.0.0'
+    testCompile 'io.reactivex.rxjava2:rxjava:2.0.8'
 
     testCompile 'com.google.guava:guava:18.0'
     testCompile 'org.apache.commons:commons-lang3:3.4'
@@ -24,7 +23,7 @@ dependencies {
     testCompile 'org.apache.activemq:activemq-client:5.14.0'
 
     testCompile 'com.jakewharton.retrofit:retrofit2-rxjava2-adapter:1.0.0'
-    testCompile 'com.squareup.retrofit2:converter-jackson:2.0.1'
+    testCompile 'com.squareup.retrofit2:converter-jackson:2.2.0'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.assertj:assertj-core:3.5.2'
@@ -33,5 +32,5 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.1'
+    gradleVersion = '3.4'
 }

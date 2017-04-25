@@ -11,6 +11,7 @@ import org.junit.Test;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,6 +22,25 @@ public class R21_FlatMap {
 	/**
 	 * Hint: UrlDownloader.download()
 	 * Hint: flatMap(), maybe concatMap()?
+	 * Hint: toList()
+     * Hint: blockingGet()
+	 */
+	@Test
+	public void shouldDownloadAllUrlsInArbitraryOrder() throws Exception {
+		Flowable<URL> urls = Urls.all();
+
+		//when
+		List<String> bodies = urls
+				.flatMap(url -> UrlDownloader.download(url).subscribeOn(Schedulers.io()))
+				.toList()
+				.blockingGet();
+
+		//then
+		assertThat(bodies).hasSize(996);
+		assertThat(bodies).contains("<html>www.twitter.com</html>", "<html>www.aol.com</html>", "<html>www.mozilla.org</html>");
+	}
+
+	/**
 	 * Hint: Pair.of(...)
 	 * Hint: Flowable.toMap()
 	 */
