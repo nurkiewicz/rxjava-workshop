@@ -9,16 +9,33 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Ignore
 public class R21_FlatMap {
-	
+
 	/**
 	 * Hint: UrlDownloader.download()
 	 * Hint: flatMap(), maybe concatMap()?
+	 * Hint: toList()
+     * Hint: blockingGet()
+	 */
+	@Test
+	public void shouldDownloadAllUrlsInArbitraryOrder() throws Exception {
+		Flowable<URL> urls = Urls.all();
+
+		//when
+		List<String> bodies = null;  //urls...
+
+		//then
+		assertThat(bodies).hasSize(996);
+		assertThat(bodies).contains("<html>www.twitter.com</html>", "<html>www.aol.com</html>", "<html>www.mozilla.org</html>");
+	}
+
+	/**
 	 * Hint: Pair.of(...)
 	 * Hint: Flowable.toMap()
 	 */
@@ -29,7 +46,7 @@ public class R21_FlatMap {
 		
 		//when
 		//WARNING: URL key in HashMap is a bad idea here
-		Map<URI, String> bodies = new HashMap<>();
+		Map<URI, String> bodies = null; //urls...
 		
 		//then
 		assertThat(bodies).hasSize(996);
