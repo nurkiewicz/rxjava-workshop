@@ -1,7 +1,9 @@
 package com.nurkiewicz.rxjava;
 
+import com.nurkiewicz.rxjava.util.UrlDownloader;
 import com.nurkiewicz.rxjava.util.Urls;
 import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -20,7 +22,13 @@ public class R23_Parallel {
 
 		//when
 		//Use UrlDownloader.downloadBlocking()
-		List<String> bodies = null; //...
+		List<String> bodies = urls
+				.parallel(100)
+				.runOn(Schedulers.io())
+				.map(UrlDownloader::downloadBlocking)
+				.sequential()
+				.toList()
+				.blockingGet();
 
 		//then
 		assertThat(bodies).hasSize(996);
