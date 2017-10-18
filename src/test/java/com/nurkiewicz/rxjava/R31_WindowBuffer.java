@@ -23,7 +23,8 @@ public class R31_WindowBuffer {
 		//then
 		everyThirdWord
 				.test()
-				.assertValues("dolor", "consectetur");
+				.assertValues("dolor", "consectetur")
+				.assertNoErrors();
 	}
 	
 	/**
@@ -40,7 +41,8 @@ public class R31_WindowBuffer {
 		//then
 		everyThirdWord
 				.test()
-				.assertValues("dolor", "consectetur");
+				.assertValues("dolor", "consectetur")
+				.assertNoErrors();
 	}
 	
 }
