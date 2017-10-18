@@ -18,7 +18,6 @@ dependencies {
     testCompile 'org.slf4j:slf4j-api:1.7.21'
     testCompile 'io.dropwizard:dropwizard-metrics:1.0.2'
 
-//    testCompile 'org.apache.camel:camel-rx:2.18'
     testCompile 'org.apache.activemq:activemq-camel:5.14.0'
     testCompile 'org.apache.activemq:activemq-client:5.14.0'
 
@@ -32,5 +31,5 @@ dependencies {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.4'
+    gradleVersion = '4.2.1'
 }
