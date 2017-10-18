@@ -45,7 +45,7 @@ public class UrlDownloader {
 		});
 	}
 	
-	private static String downloadBlocking(URL url) {
+	public static String downloadBlocking(URL url) {
 		log.trace("Downloading: {}", url);
 		Sleeper.sleep(ofSeconds(1), ofMillis(500));
 		log.trace("Done: {}", url);
