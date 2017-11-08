@@ -42,19 +42,7 @@ public class R20_ObservableFromFile {
 		observer.assertError(FileNotFoundException.class);
 		assertThat(observer.errors().get(0)).hasMessageContaining("urrrrrls.txt");
 	}
-	
-	@Test
-	public void shouldFailWhenBrokenFile() throws Exception {
-		Flowable<URL> all = Urls.all("urls_broken.txt");
-		
-		//when
-		final TestSubscriber<URL> observer = all.test();
-		
-		//then
-		observer.assertError(IllegalArgumentException.class);
-		assertThat(observer.errors().get(0)).hasMessageContaining("john@gmail.com");
-	}
-	
+
 	@Test
 	public void shouldParseAllUrls() throws Exception {
 		//given
