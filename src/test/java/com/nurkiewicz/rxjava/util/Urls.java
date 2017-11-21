@@ -2,11 +2,13 @@ package com.nurkiewicz.rxjava.util;
 
 import io.reactivex.Flowable;
 
-import java.io.*;
-import java.net.MalformedURLException;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -23,16 +25,9 @@ public class Urls {
 	
 	private static Flowable<URL> load(String fileName) {
 		try (Stream<String> lines = classpathReaderOf(fileName).lines()) {
-			final List<URL> all = lines
-					.map(url -> {
-						try {
-							return new URL(url);
-						} catch (MalformedURLException e) {
-							throw new IllegalArgumentException(e);
-						}
-					})
-					.collect(toList());
-			return Flowable.fromIterable(all);
+			return Flowable
+					.fromIterable(lines.collect(toList()))
+					.map(URL::new);
 		} catch (Exception e) {
 			return Flowable.error(e);
 		}

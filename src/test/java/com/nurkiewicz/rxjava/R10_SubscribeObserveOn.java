@@ -22,13 +22,13 @@ import static org.awaitility.Awaitility.await;
 
 @Ignore
 public class R10_SubscribeObserveOn {
-	
+
 	private static final Logger log = LoggerFactory.getLogger(R10_SubscribeObserveOn.class);
-	
+
 	@Test
 	public void subscribeOn() throws Exception {
 		Flowable<BigDecimal> obs = slowFromCallable();
-		
+
 		obs
 				.subscribeOn(Schedulers.io())
 				.subscribe(
@@ -36,11 +36,11 @@ public class R10_SubscribeObserveOn {
 				);
 		Sleeper.sleep(ofMillis(1_100));
 	}
-	
+
 	@Test
 	public void subscribeOnForEach() throws Exception {
 		Flowable<BigDecimal> obs = slowFromCallable();
-		
+
 		obs
 				.subscribeOn(Schedulers.io())
 				.subscribe(
@@ -48,7 +48,7 @@ public class R10_SubscribeObserveOn {
 				);
 		Sleeper.sleep(ofMillis(1_100));
 	}
-	
+
 	private Flowable<BigDecimal> slowFromCallable() {
 		return Flowable.fromCallable(() -> {
 			log.info("Starting");
@@ -57,7 +57,7 @@ public class R10_SubscribeObserveOn {
 			return BigDecimal.TEN;
 		});
 	}
-	
+
 	@Test
 	public void observeOn() throws Exception {
 		slowFromCallable()
@@ -84,11 +84,11 @@ public class R10_SubscribeObserveOn {
 		await().until(() -> {
 					Thread lastSeenThread = subscriber.lastThread();
 					assertThat(lastSeenThread).isNotNull();
-					assertThat(lastSeenThread.getName()).startsWith("CustomExecutor-");
+					assertThat(lastSeenThread.getName()).matches("CustomExecutor-\\d+");
 				}
 		);
 	}
-	
+
 	/**
 	 * Hint: Schedulers.from()
 	 * Hint: ThreadFactoryBuilder
@@ -99,6 +99,5 @@ public class R10_SubscribeObserveOn {
 				.build();
 		return Schedulers.from(Executors.newFixedThreadPool(10, threadFactory));
 	}
-	
 	
 }
